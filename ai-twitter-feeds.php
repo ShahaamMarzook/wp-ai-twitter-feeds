@@ -235,8 +235,7 @@ function get_loklak_connect($ai_twitteruser_gt,$ai_notweets_gt){
 	$ai_tweets_all = $ai_connection->search('', null, null, $ai_twitteruser_gt, $ai_notweets_gt);
     $ai_tweets_all = json_decode($ai_tweets_all, true);
     $ai_tweets_all = json_decode($ai_tweets_all['body'], true);
-    $ai_tweets_all = $ai_tweets_all['statuses']; 
-    $ai_tweets_all = (object)$ai_tweets_all;
+    $ai_tweets_all = $ai_tweets_all['statuses'];
     return $ai_tweets_all;
 }
 
@@ -304,11 +303,9 @@ function ai_get_twitter_feeds($atts){
 		<div class='aiwidget-title'><span class='tweet_author_name'>".$ai_twitteruser."</span>&nbsp;<span class='tweet_author_heading'><a href='https://twitter.com/$ai_twitteruser' target='_blank'>@".$ai_twitteruser."</a></span></div>";
 
 		for($i=0; $i<count($ai_tweets); $i++) {
-			print_r("hello");
 			$ai_tweets[$i] = (object)$ai_tweets[$i];
 			$ai_tweets[$i]->user = (object)$ai_tweets[$i]->user;
 			if(!empty($ai_tweets->errors)) {
-				print_r("hello");
 				$ai_output .= '<p>'.$ai_tweets->errors[$i]->message.'</p>';
 			} else {
 				$ai_img_html='<a href="https://twitter.com/'.$ai_twitteruser.'" target="_blank"><img src="'.$ai_tweets[$i]->user->profile_image_url_https.'" class="imgalign"/></a>';
