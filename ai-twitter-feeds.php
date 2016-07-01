@@ -63,6 +63,7 @@ function ai_add_dashboard_tweets_feed() {
 *Register Twitter Specific Options 
 */
 function ai_init(){
+	register_setting('ai_options','ai_loklak_api');
 	register_setting('ai_options','ai_consumer_screen_name');//todo - add sanitization function ", 'functionName'"
 	register_setting('ai_options','ai_consumer_key');
 	register_setting('ai_options','ai_consumer_secret');
@@ -76,6 +77,7 @@ if( function_exists('register_uninstall_hook') )
 	register_uninstall_hook(__FILE__,'ai_twitterfeed_uninstall');   
 
 function ai_twitterfeed_uninstall(){
+	delete_option('ai_loklak_api');
 	delete_option('ai_consumer_screen_name'); 
 	delete_option('ai_consumer_key');
 	delete_option('ai_consumer_secret');
@@ -99,6 +101,19 @@ function ai_option_page(){ ?>
 		<form action="options.php" method="post" id="ai-options-form">
 			<?php settings_fields('ai_options'); ?>
 			<table class="form-table">
+				<tr class="even" valign="top">
+					<th scope="row">
+						<label for="ai_loklak_api">
+							<?php _e('Use Loklak API instead of twitter','aitwitterfeeds');?>
+						</label>
+					</th>
+					<td>
+						<input type="checkbox" id="ai_loklak_api" name="ai_loklak_api" <?php checked( isset( $get_option['loklak_api']), true ); ?>" />
+						<p class="description">
+							Use anonymous API of <a href="http://loklak.org/">loklak.org</a> and get plugin data<br/> through loklak (no registration and authentication required).<br/> <a href="http://loklak.org/">Find out more</a>
+						</p>
+					</td>
+				</tr>
 				<tr class="even" valign="top">
 					<th scope="row">
 						<label for="ai_consumer_screen_name">
@@ -332,7 +347,7 @@ function ai_get_twitter_feeds($atts){
 class AI_Twitter_Widget extends WP_Widget {
 
 	/* Register the widget for use in WordPress */ 
-	public function AI_Twitter_Widget(){
+	function __construct(){
 		$this->options = array(
 			array(
 				'label' => '<div style="background-color: #ddd; padding: 5px; text-align:center; color: red; font-weight:bold;">AI Widget settings</div>',
