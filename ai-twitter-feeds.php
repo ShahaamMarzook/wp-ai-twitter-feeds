@@ -228,6 +228,14 @@ function ai_twitter_formatter($ai_date){
 
 require_once("twitteroauth/twitteroauth.php"); //Path to twitteroauth library
 
+function get_loklak_connect($ai_twitteruser_gt,$ai_notweets_gt){
+	$ai_connection = new loklak();
+	$ai_tweets_all = $ai_connection->search('', null, null, $ai_twitteruser_gt, $ai_notweets_gt);
+    $ai_tweets_all = json_decode($ai_tweets_all, true);
+    $ai_tweets_all = json_decode($ai_tweets_all['body'], true);
+    $ai_tweets_all = $ai_tweets_all['statuses']; 
+}
+
 function getConnectionWithAccessToken($cons_key, $cons_secret, $oauth_token, $oauth_token_secret){
 	$ai_connection = new TwitterOAuth($cons_key, $cons_secret, $oauth_token, $oauth_token_secret);
 	return $ai_connection;
@@ -253,14 +261,18 @@ function ai_get_twitter_feeds($atts){
 	$ai_get_tweetstitle=$ai_tweet_title ? $ai_tweet_title:'Latest Twetter Feeds';
 	$ai_twitteruser = $ai_get_twitteruser;
 	$ai_notweets = $ai_get_notweets;
+	$ai_loklakapi = get_options('ai_loklak_api');
 	$ai_consumerkey = get_option('ai_consumer_key');
 	$ai_consumersecret = get_option('ai_consumer_secret');
 	$ai_accesstoken = get_option('ai_access_token');
 	$ai_accesstokensecret = get_option('ai_access_token_secret');
 	$ai_twitter_css = get_option('ai_twitter_css');
 
-	if($ai_twitteruser!='' && $ai_notweets !='' && $ai_consumerkey!='' && $ai_consumersecret!='' && $ai_accesstoken!='' && $ai_accesstokensecret!='') {
-		$ai_tweets = get_connect($ai_consumerkey, $ai_consumersecret, $ai_accesstoken, $ai_accesstokensecret,$ai_twitteruser,$ai_notweets);
+	if($ai_twitteruser!='' && $ai_notweets !='' && ($ai_loklakapi == true || ($ai_consumerkey!='' && $ai_consumersecret!='' && $ai_accesstoken!='' && $ai_accesstokensecret!=''))) {
+		if($ai_loklakapi)
+			$ai_tweets = get_loklak_connect($ai_twitteruser,$ai_notweets);
+		else
+			$ai_tweets = get_connect($ai_consumerkey, $ai_consumersecret, $ai_accesstoken, $ai_accesstokensecret,$ai_twitteruser,$ai_notweets);
 
 		wp_register_style('aitwitter', plugins_url('css/aitwitter.css', __FILE__));
 		wp_enqueue_style('aitwitter');
