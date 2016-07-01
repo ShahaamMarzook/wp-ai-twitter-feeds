@@ -108,7 +108,7 @@ function ai_option_page(){ ?>
 						</label>
 					</th>
 					<td>
-						<input type="checkbox" id="ai_loklak_api" name="ai_loklak_api" <?php checked( isset( $get_option['loklak_api']), true ); ?>" />
+						<input type="checkbox" id="ai_loklak_api" name="ai_loklak_api" <?php checked( get_option('ai_loklak_api'), 'on' ); ?>/>
 						<p class="description">
 							Use anonymous API of <a href="http://loklak.org/">loklak.org</a> and get plugin data<br/> through loklak (no registration and authentication required).<br/> <a href="http://loklak.org/">Find out more</a>
 						</p>
@@ -225,6 +225,8 @@ function ai_twitter_formatter($ai_date){
 	$ai_twitter_time = human_time_diff($ai_epoch_timestamp, current_time('timestamp') ) . ' ago';
 	return $ai_twitter_time;
 }
+if(!class_exists('Loklak'))
+	require_once("loklak_php_api/loklak.php"); //Path to Loklak API library
 
 require_once("twitteroauth/twitteroauth.php"); //Path to twitteroauth library
 
@@ -234,6 +236,8 @@ function get_loklak_connect($ai_twitteruser_gt,$ai_notweets_gt){
     $ai_tweets_all = json_decode($ai_tweets_all, true);
     $ai_tweets_all = json_decode($ai_tweets_all['body'], true);
     $ai_tweets_all = $ai_tweets_all['statuses']; 
+    $ai_tweets_all = (object)$ai_tweets_all;
+    return $ai_tweets_all;
 }
 
 function getConnectionWithAccessToken($cons_key, $cons_secret, $oauth_token, $oauth_token_secret){
@@ -261,7 +265,7 @@ function ai_get_twitter_feeds($atts){
 	$ai_get_tweetstitle=$ai_tweet_title ? $ai_tweet_title:'Latest Twetter Feeds';
 	$ai_twitteruser = $ai_get_twitteruser;
 	$ai_notweets = $ai_get_notweets;
-	$ai_loklakapi = get_options('ai_loklak_api');
+	$ai_loklakapi = get_option('ai_loklak_api');
 	$ai_consumerkey = get_option('ai_consumer_key');
 	$ai_consumersecret = get_option('ai_consumer_secret');
 	$ai_accesstoken = get_option('ai_access_token');
@@ -300,7 +304,11 @@ function ai_get_twitter_feeds($atts){
 		<div class='aiwidget-title'><span class='tweet_author_name'>".$ai_twitteruser."</span>&nbsp;<span class='tweet_author_heading'><a href='https://twitter.com/$ai_twitteruser' target='_blank'>@".$ai_twitteruser."</a></span></div>";
 
 		for($i=0; $i<count($ai_tweets); $i++) {
+			print_r("hello");
+			$ai_tweets[$i] = (object)$ai_tweets[$i];
+			$ai_tweets[$i]->user = (object)$ai_tweets[$i]->user;
 			if(!empty($ai_tweets->errors)) {
+				print_r("hello");
 				$ai_output .= '<p>'.$ai_tweets->errors[$i]->message.'</p>';
 			} else {
 				$ai_img_html='<a href="https://twitter.com/'.$ai_twitteruser.'" target="_blank"><img src="'.$ai_tweets[$i]->user->profile_image_url_https.'" class="imgalign"/></a>';
